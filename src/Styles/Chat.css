@@ -1,0 +1,82 @@
+.chat-area {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: rgb(248, 248, 248);
+    overflow: hidden; /* Ensure no overflow issues */
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    background-color:rgb(248, 248, 248);
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.message-content {
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #E9E9EB; /* Common message color */
+    display: inline-block;
+    max-width: 70%; /* Ensure messages do not exceed this width */
+    word-wrap: break-word; /* Handle long words */
+}
+
+.outgoing .message-content {
+    align-self: flex-end; /* Align sender's messages to the right */
+}
+
+.incoming .message-content {
+    align-self: flex-start; /* Align receiver's messages to the left */
+}
+
+.message-content p {
+    margin: 0;
+}
+
+.message-sender {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.message-time {
+    margin-top: 5px;
+    color: #777;
+    font-size: 0.8rem;
+}
+
+.message-box {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+#msg {
+    flex: 1;
+    height: 5vh;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
+    outline: none;
+}
+
+.message-box button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 8vh;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.5rem;
+}

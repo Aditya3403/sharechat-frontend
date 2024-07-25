@@ -1,0 +1,20 @@
+Chat Application using MERN Stack -
+ 1. Technologies Used:-
+    a. Mongo Db
+    b. Express Js
+    c. React Js
+    d. Node Js
+
+2. Functionalities -
+    a. User Login/Sign Up
+    b. Without Login cannot Chat
+    c. Dashboard
+    d. Follow Request
+    e. Notification
+    f. Chat with other users
+    g. Search for other users
+    h. Logout from the application
+
+3. Future Advancements -
+    a. Group Feature
+    b. Send and recieve images, videos etc

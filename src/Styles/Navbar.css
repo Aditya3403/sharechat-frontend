@@ -1,0 +1,77 @@
+.navbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    color: black;
+    width: 100%;
+    height: 6vh;
+    border-bottom: 1px solid lightgray;
+}
+
+.fa-gear {
+    color: rgb(70, 70, 70);
+}
+
+.navbar-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 4vw;
+}
+
+.navbar-left .logo {
+    width: 100px;
+}
+
+.navbar-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-right: 4vw;
+    margin-left: auto;
+}
+
+.navbar-right a {
+    color: #000000;
+    text-decoration: none;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+    width: 3vw;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: calc(100%);
+    right: 0;
+    width: 160px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.dropdown:hover .dropdown-content,
+.dropdown-content.settings-dropdown {
+    display: block;
+}
+
+.light, .dark, .login, .navbar-logout{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    padding: 10px;
+    margin: 5px 0;
+    font-size: 1.1rem;
+}
+
+.light .fa-sun, .dark .fa-moon, .login .fa-login {
+    color: rgb(70, 70, 70);
+}

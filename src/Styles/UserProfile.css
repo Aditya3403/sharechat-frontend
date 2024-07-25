@@ -1,0 +1,102 @@
+.userProfile{
+    display: flex;
+    flex-direction: column;
+}
+.profile-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    top: 50px;
+}
+.profile-panel {
+    position: absolute;
+    top: 115px;
+    left: 10px;
+    width: 530px;
+    height: 250px;
+    padding: 10px;
+    background-color: #fff;
+    box-shadow: 10px 10px 20px 0px #e0e0e0;
+    display: flex; /* Add display flex to arrange children */
+    align-items: center; /* Center content vertically */
+}
+
+.profile-content {
+    display: flex;
+    align-items: center; /* Center content vertically */
+    flex-grow: 1; /* Allow content to grow */
+}
+
+.profile-image {
+    margin-right: 20px; /* Add space between image and details */
+}
+
+.profile-image img {
+    width: 100px; /* Adjust size as needed */
+    height: 100px;
+    border-radius: 50%; /* Make the image round */
+}
+
+.profile-details {
+    flex-grow: 1; /* Allow details section to grow and take remaining space */
+}
+.about{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    width: 25vw;
+}
+.joining{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 20vw;
+    margin: 0;
+    padding: 0;
+}
+.phone {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 15vw;
+    margin: 0;
+    padding: 0;
+}
+.handle-Edit-Logout{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    width: 12vw;
+}
+.edit-profile {
+    margin-bottom: 10px; /* Add space between button and details */
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.edit-profile:hover {
+    background-color: #0056b3;
+}
+
+.profile-details div {
+    margin-bottom: 10px; /* Add space between detail items */
+}
+.logout {
+    margin-bottom: 10px; /* Add space between button and details */
+    padding: 8px 16px;
+    background-color: #ff0000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.logout:hover {
+    background-color: #b30000;
+}

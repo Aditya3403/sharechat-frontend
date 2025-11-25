@@ -1,0 +1,39 @@
+/* TextsLanding.css */
+body {
+  margin: 0;
+  font-family: "Montserrat";
+  line-height: 1;
+  color: #000;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  text-align: center;
+}
+
+.heading{
+    font-size: 6rem;
+}
+
+.download-btn {
+  background: none;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  padding: 12px 24px;
+  cursor: pointer;
+  color: white;
+  background-color: #000;
+}
+
+

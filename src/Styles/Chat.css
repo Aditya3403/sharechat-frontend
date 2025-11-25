@@ -1,0 +1,346 @@
+.chat-area {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(248, 248, 248);
+    height: 100vh; /* Full viewport height */
+    overflow: hidden; /* Prevent overall scrolling */
+    border-top: 1px solid rgb(227, 227, 227);
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    padding-right: 15px;
+    padding-left: 15px;
+    background-color: white;
+    flex-shrink: 0;
+    border-top: 1px solid rgb(227, 227, 227);
+    border-bottom: 1px solid rgb(227, 227, 227);
+}
+
+.user-avatar, .user-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover; /* Ensures avatar image fits properly */
+    margin-right: 10px;
+}
+
+.user-avatar-placeholder {
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.chat-messages {
+    flex: 1; /* Takes all available space */
+    overflow-y: auto; /* Enable scrolling only for messages */
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0; /* Crucial for flex scrolling */
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* Hide scrollbar for IE, Edge and Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* This is the container div that handles alignment */
+.message-container {
+    display: flex;
+    width: 100%;
+}
+
+.own-message {
+    justify-content: flex-end; /* Right align sent messages */
+}
+
+.other-message {
+    justify-content: flex-start; /* Left align received messages */
+}
+
+/* This is the message bubble */
+.message-bubble {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 18px;
+    position: relative;
+}
+
+.outgoing {
+    background-color: #dcf8c6; /* Green for sent messages */
+    border-bottom-right-radius: 5px;
+}
+
+.incoming {
+    background-color: #f1f0f0; /* Gray for received messages */
+    border-bottom-left-radius: 5px;
+}
+
+.message-content {
+    word-wrap: break-word;
+}
+
+.message-content p {
+    margin: 0;
+}
+
+.timestamp {
+    font-size: 0.7rem;
+    color: #777;
+    display: block;
+    text-align: right;
+    margin-top: 2px;
+}
+
+.read-indicator {
+    margin-left: 5px;
+    color: #4fc3f7;
+}
+
+.message-box {
+    display: flex;
+    padding: 15px;
+    background-color: white;
+    border-left: 1px solid rgb(227, 227, 227);
+    flex-shrink: 0; /* Keep input fixed at bottom */
+}
+
+.message-box input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    outline: none;
+}
+
+.message-box button {
+    margin-left: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.no-messages, .loading-messages, .error-message {
+    text-align: center;
+    color: #777;
+    padding: 20px;
+}
+
+.no-chat-selected {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #777;
+    font-size: 1.2em;
+}
+.message-date-group {
+    margin-bottom: 20px;
+  }
+  
+  .date-divider {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+    color: #777;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+  
+  .date-divider::before,
+  .date-divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #e0e0e0;
+    margin: 0 10px;
+  }
+
+  /* --- Attachment UI --- */
+
+.attachment-wrapper {
+  position: relative;
+}
+
+.clip-btn {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 8px;
+  color: #555;
+}
+
+.clip-btn:hover {
+  color: #111;
+}
+
+.attachment-menu {
+  position: absolute;
+  bottom: 50px; /* <--- dropdown OPEN UP */
+  left: 0;
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 0;
+  min-width: 160px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  z-index: 999;
+  animation: menuPop .2s ease-out;
+}
+
+.attachment-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  display: block;
+}
+
+.attachment-item:hover {
+  background: #f2f2f2;
+}
+
+@keyframes menuPop {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.chat-img {
+  max-width: 240px;
+  max-height: 280px;
+  border-radius: 10px;
+  display: block;
+}
+
+
+.preview-container {
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  animation: slideUp .25s ease-out;
+}
+
+.preview-img {
+  max-height: 200px;
+  max-width: 80%;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.cancel-preview-btn {
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,.2);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0 }
+  to   { transform: translateY(0px); opacity: 1 }
+}
+
+.image-preview-popup {
+  position: absolute;
+  bottom: 4%;
+  left: 40%;
+  width: 30%;
+
+  height: 40%; /* this makes it use half chat area */
+  background: #ffffff;
+  border-radius: 0px 0px 0 0;
+
+  box-shadow: 0 -6px 15px rgba(0,0,0,.12);
+  display: flex;
+  flex-direction: column;
+  animation: popUp .25s ease-out;
+  z-index: 999;
+}
+
+/* Top bar */
+.image-preview-header {
+  width: 100%;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* cancel button in right corner */
+.close-preview {
+  position: absolute;
+  right: 16px;
+  top: 6px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Image takes max space */
+.image-preview-body {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.image-preview-body img {
+  max-width: 90%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+/* Caption area at bottom */
+.image-preview-caption {
+  padding: 10px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.image-preview-caption input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 15px;
+}
+
+/* slide up animation */
+@keyframes popUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+
+
+  

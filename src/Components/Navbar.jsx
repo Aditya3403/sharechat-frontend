@@ -1,21 +1,78 @@
 import React, { useState, useEffect } from 'react';
 import '../Styles/Navbar.css';
-import { FiLogIn } from "react-icons/fi";
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import useUserStore from '../store/useUserStore.js';
 
 const Navbar = () => {
-  const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+  const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [activeTab, setActiveTab] = useState('new');
+  const { currentUser, fetchCurrentUser, updateUser } = useUserStore();
   const navigate = useNavigate();
+
+  // Get notifications from currentUser object
+  const allNotifications = currentUser?.notifications || [];
+  const newNotifications = allNotifications.filter(n => !n.archived);
+  const archivedNotifications = allNotifications.filter(n => n.archived);
+  const unreadCount = newNotifications.filter(n => !n.read).length;
+
+  // Determine which notifications to display based on active tab
+  const displayedNotifications = activeTab === 'new' ? newNotifications : archivedNotifications;
 
   useEffect(() => {
     const token = Cookies.get('token');
     setIsLoggedIn(!!token);
-  }, []);
+    
+    if (token) {
+      fetchCurrentUser();
+    }
+  }, [fetchCurrentUser]);
 
-  const toggleSettingsDropdown = () => {
-    setShowSettingsDropdown(!showSettingsDropdown);
+  const toggleNotificationsDropdown = () => {
+    setShowNotificationsDropdown(!showNotificationsDropdown);
+  };
+
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) return `${interval}y ago`;
+    
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) return `${interval}mo ago`;
+    
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return `${interval}d ago`;
+    
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return `${interval}h ago`;
+    
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return `${interval}m ago`;
+    
+    return 'Just now';
+  };
+
+  const handleArchiveNotification = async (notificationId) => {
+    try {
+      const updatedNotifications = allNotifications.map(notification => {
+        if (notification._id === notificationId) {
+          return { ...notification, archived: true, read: true };
+        }
+        return notification;
+      });
+      
+      // Update the user in the Zustand store
+      await updateUser({ notifications: updatedNotifications });
+      
+      // Force refresh the current user data
+      await fetchCurrentUser();
+    } catch (error) {
+      console.error('Error archiving notification:', error);
+    }
   };
 
   const handleLogOut = () => {
@@ -30,45 +87,76 @@ const Navbar = () => {
         <h3>ShareChat</h3>
       </div>
       <div className="navbar-right">
-        <div className="dropdown">
-          <button className="settings-icon" onClick={toggleSettingsDropdown}>
-            <i className="fa-solid fa-gear fa-lg"></i>
-          </button>
-          {showSettingsDropdown && (
-            <div className="dropdown-content settings-dropdown">
-              <a href="#">
-                <div className='light'>
-                  <i className="fa-solid fa-sun fa-xl"></i>
-                  <span>Light Theme</span>
-                </div>
-              </a>
-              <a href="#">
-                <div className='dark'>
-                  <i className="fa-solid fa-moon fa-xl"></i>
-                  <span>Dark Theme</span>
-                </div>
-              </a>
-              {!isLoggedIn ? (
-                <Link to="/login">
-                  <div className='login'>
-                    <FiLogIn />
-                    <span>Login / Sign Up</span>
-                  </div>
-                </Link>
-              ) : (
-                <a href="#">
-                  <div className='navbar-logout' onClick={handleLogOut}>
-                    <i className="fa-solid fa-sign-out-alt fa-xl"></i>
-                    <span>Log Out</span>
-                  </div>
-                </a>
+        {isLoggedIn && (
+          <div className="dropdown">
+            <button className="notifications-icon" onClick={toggleNotificationsDropdown}>
+              <i className="fa-regular fa-bell"></i>
+              {unreadCount > 0 && (
+                <span className="notification-badge">{unreadCount}</span>
               )}
-            </div>
-          )}
-        </div>
+            </button>
+            
+            {showNotificationsDropdown && (
+              <div className="dropdown-content notifications-dropdown">
+                <div className="notifications-header">
+                  <h4>Notifications</h4>
+                  <div className="notification-tabs">
+                    <button 
+                      className={`tab-btn ${activeTab === 'new' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('new')}
+                    >
+                      New {unreadCount > 0 && `(${unreadCount})`}
+                    </button>
+                    <button 
+                      className={`tab-btn ${activeTab === 'archived' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('archived')}
+                    >
+                      Archived ({archivedNotifications.length})
+                    </button>
+                  </div>
+                </div>
+                
+                {displayedNotifications.length > 0 ? (
+                  <div className="notifications-list">
+                    {displayedNotifications.map((notification) => (
+                      <div key={notification._id} className="notification-item">
+                        <div className="notification-sender">
+                          <img 
+                            src={notification.senderAvatar?.url || '/default-profile.png'} 
+                            alt={notification.senderName}
+                            className="notification-profile-pic"
+                          />
+                        </div>
+                        <div className="notification-content">
+                          <p>
+                            <strong>{notification.senderName}</strong> sent you a message
+                          </p>
+                          <small>{formatTimeAgo(notification.createdAt)}</small>
+                        </div>
+                        {activeTab === 'new' && (
+                          <button 
+                            className="archive-btn"
+                            onClick={() => handleArchiveNotification(notification._id)}
+                            title="Archive notification"
+                          >
+                            <i className="fa-regular fa-bookmark"></i>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="no-notifications">
+                    <p>No {activeTab} notifications</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </nav>
   );
-}
+};
 
 export default Navbar;

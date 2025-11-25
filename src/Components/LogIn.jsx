@@ -2,62 +2,107 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import '../Styles/LogIn.css';
-import avatar from '../Constants/avatar.jpg';
+import { FaGoogle, FaEnvelope, FaLock, FaArrowLeft } from 'react-icons/fa';
 
 const LogIn = ({ setUser }) => {
-  const [isLogIn, setIsLogIn] = useState(false);
-  const [fname, setFname] = useState('');
-  const [lname, setLname] = useState('');
-  const [password, setPassword] = useState('');
+  const [isLogIn, setIsLogIn] = useState(true);
+  const [step, setStep] = useState(1); // 1: Email entry, 2: OTP verification
   const [email, setEmail] = useState('');
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [timer, setTimer] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedFile(file);
-        setPreviewImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+  // Timer for OTP resend
+  React.useEffect(() => {
+    let interval;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
     }
-  };
+    return () => clearInterval(interval);
+  }, [timer]);
 
-  const handleButtonClick = () => {
-    document.getElementById('imageUpload').click();
-  };
-
-  const handleSignUp = async (event) => {
-    event.preventDefault();
-
-    const formData = new FormData();
-    formData.append('firstName', fname);
-    formData.append('lastName', lname);
-    formData.append('email', email);
-    formData.append('password', password);
-    if (selectedFile) {
-      formData.append('image', selectedFile);
-    }
-
+  const handleSendOTP = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
     try {
-      const response = await fetch('http://localhost:3000/user/signup', {
+      const response = await fetch('http://localhost:3000/user/send-otp', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
       });
 
       if (response.ok) {
-        const data = await response.json();
-        Cookies.set('token', data.token, { expires: 30 });
-        setUser(true);
-        navigate('/');
+        setStep(2);
+        setTimer(60);
       } else {
-        console.error('Sign up failed with status:', response.status);
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to send OTP. Please try again.');
       }
     } catch (error) {
-      console.error('Error signing up:', error);
+      console.error('Error sending OTP:', error);
+      alert('Error sending OTP. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('http://localhost:3000/user/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      if (response.ok) {
+        // Redirect to onboarding page with verified email
+        navigate('/onboarding', { state: { verifiedEmail: email } });
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Invalid OTP. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      alert('Error verifying OTP. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (timer > 0) return;
+    
+    try {
+      const response = await fetch('http://localhost:3000/user/send-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        setTimer(60);
+        alert('OTP sent successfully!');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to resend OTP. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error resending OTP:', error);
+      alert('Error resending OTP. Please try again.');
     }
   };
 
@@ -75,102 +120,154 @@ const LogIn = ({ setUser }) => {
       if (response.ok) {
         const data = await response.json();
         Cookies.set('token', data.token, { expires: 30 });
+        localStorage.setItem('token', data.token);
         setUser(true);
         navigate('/');
       } else {
-        console.error('Login failed with status:', response.status);
+        alert('Invalid credentials. Please try again.');
       }
     } catch (error) {
       console.error('Error logging in:', error);
+      alert('Error logging in. Please try again.');
     }
   };
 
-  const toggleLogIn = () => setIsLogIn(!isLogIn);
+  const toggleLogIn = () => {
+    setIsLogIn(!isLogIn);
+    setStep(1);
+    setEmail('');
+    setOtp('');
+    setPassword('');
+  };
 
-  return (
-    isLogIn ? (
-      <div className="login-container">
-        <div className="login-form">
-          <h2>Login</h2>
-          <form onSubmit={handleLogIn}>
-            <div className="input-container">
-              <input
-                type="text"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="input-container">
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <button className="login-button" type="submit">Log In</button>
-          </form>
-          <p className="switch-page-text" onClick={toggleLogIn}>Don't have an account? Sign Up</p>
+  const handleBack = () => {
+    if (step === 2) {
+      setStep(1);
+      setOtp('');
+    }
+  };
+
+  // If user is signing up and email is not verified, show verification steps
+  if (!isLogIn && step < 3) {
+    return (
+      <div className="auth-container">
+        <div className="auth-form">
+          {step > 1 && (
+            <button className="back-button" onClick={handleBack}>
+              <FaArrowLeft />
+            </button>
+          )}
+          
+          <h2>
+            {step === 1 && 'Create your account'}
+            {step === 2 && 'Verify your email'}
+          </h2>
+
+          {step === 1 && (
+            <form onSubmit={handleSendOTP}>
+              <div className="input-group">
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <button type="submit" className="auth-button" disabled={isLoading}>
+                {isLoading ? 'Sending...' : 'Send Verification Code'}
+              </button>
+              
+              <p className="toggle-auth" onClick={toggleLogIn}>
+                Already have an account? Log in
+              </p>
+            </form>
+          )}
+
+          {step === 2 && (
+            <form onSubmit={handleVerifyOTP}>
+              <p className="otp-instructions">
+                We've sent a 6-digit verification code to <strong>{email}</strong>
+              </p>
+              <div className="input-group">
+                <input
+                  type="text"
+                  placeholder="Enter 6-digit code"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  maxLength={6}
+                  required
+                />
+              </div>
+              <button type="submit" className="auth-button" disabled={isLoading}>
+                {isLoading ? 'Verifying...' : 'Verify Code'}
+              </button>
+              <p className="resend-otp">
+                Didn't receive the code?{' '}
+                <span 
+                  className={timer > 0 ? 'resend-disabled' : 'resend-enabled'} 
+                  onClick={handleResendOTP}
+                >
+                  Resend {timer > 0 ? `(${timer}s)` : ''}
+                </span>
+              </p>
+              
+              <p className="toggle-auth" onClick={toggleLogIn}>
+                Already have an account? Log in
+              </p>
+            </form>
+          )}
         </div>
       </div>
-    ) : (
-      <div className="signup-container">
-        <form onSubmit={handleSignUp}>
-          <div className="signup-form">
-            <h2>Sign Up</h2>
-            <div className="avatar-container">
-              <img src={previewImage || avatar} alt="Avatar" className="avatar" />
-              <button type="button" className="imageUpload" onClick={handleButtonClick}>
-                <i className="fa-solid fa-pen"></i>
-                <span>Image</span>
-              </button>
-              <input
-                type="file"
-                id="imageUpload"
-                accept="image/*"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-              />
-            </div>
-            <div className="input-container">
-              <input
-                type="text"
-                placeholder="First Name"
-                value={fname}
-                onChange={(e) => setFname(e.target.value)}
-              />
-            </div>
-            <div className="input-container">
-              <input
-                type="text"
-                placeholder="Last Name"
-                value={lname}
-                onChange={(e) => setLname(e.target.value)}
-              />
-            </div>
-            <div className="input-container">
-              <input
-                type="email"
-                placeholder="Email Address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="input-container">
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <button className="signup-button" type="submit">Sign Up</button>
-            <p className="switch-page-text" onClick={toggleLogIn}>Already have an account? Log In</p>
+    );
+  }
+
+  // Regular login form
+  return (
+    <div className="auth-container">
+      <div className="auth-form">
+        <h2>Log in</h2>
+        
+        <form onSubmit={handleLogIn}>
+          <div className="input-group">
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
+          
+          <div className="input-group">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          
+          <button type="submit" className="auth-button">
+            Continue
+          </button>
         </form>
+        
+        <div className="divider">
+          <span>OR CONTINUE WITH</span>
+        </div>
+        
+        <button className="google-button">
+          <FaGoogle className="google-icon" />
+          <span>Google</span>
+        </button>
+        
+        <p className="toggle-auth" onClick={toggleLogIn}>
+          Don't have an account? Sign up
+        </p>
       </div>
-    )
+    </div>
   );
 };
 

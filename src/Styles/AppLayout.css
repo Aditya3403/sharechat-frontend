@@ -21,6 +21,8 @@
     grid-column-start: 2;
     grid-column-end: 7;
     justify-content: center;
+    border-left: 1px solid rgb(227, 227, 227);
+    border-right: 1px solid rgb(227, 227, 227);
 }
 .home-chatArea{
     display: grid;

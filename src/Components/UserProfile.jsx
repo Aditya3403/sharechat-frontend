@@ -1,56 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 import '../Styles/UserProfile.css';
-import avatar from '../Constants/avatar.jpg';
+import defaultAvatar from '../Constants/avatar.jpg';
+import useUserStore from '../store/useUserStore.js';
+// Import Lucide icons
+import { Star, Settings, PenLine, LogOut } from 'lucide-react';
 
 const UserProfile = () => {
+  const [showProfile, setShowProfile] = useState(false);
+  const { currentUser, fetchCurrentUser } = useUserStore();
+  const [userData, setUserData] = useState({
+    name: 'Loading...',
+    avatar: defaultAvatar,
+    about: 'Loading...',
+    email: 'Loading...'
+  });
 
-    const [showProfile, setShowProfile] = useState(false);
-    const toggleProfile = () => {
-        setShowProfile(!showProfile);
-    };
+  const toggleProfile = () => {
+    setShowProfile(!showProfile);
+  };
 
-    const handleEditProfile = () => {
-        // Logic to edit profile
-        console.log('Editing profile...');
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        await fetchCurrentUser();
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
     };
-  return (
-    <>
-            <div className='userProfile'>
-                <div className="profile-icon" onClick={toggleProfile}>
-                    <img src={avatar} alt="" />
-                </div>
-                {showProfile && (
-                    <div className="profile-panel">
-                        <div className="profile-content">
-                            <div className="profile-image">
-                                <img src={avatar} alt="Profile" />
-                            </div>
-                            <div className="profile-details">
-                                <div className='about'>
-                                    <span>About: Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>
-                                    <i class="fa-solid fa-pen"></i>
-                                </div>
-                                <div className='phone'>
-                                    <span>Phone: 123-456-7890</span>
-                                    <i class="fa-solid fa-pen"></i>
-                                </div>
-                                <div className='joining'>
-                                    <span>Date of Joining: January 1, 2022</span>
-                                    <i class="fa-solid fa-pen"></i>
-                                </div>
-                                <div className="handle-Edit-Logout">
-                                    <button className="edit-profile" onClick={handleEditProfile}>Edit Profile</button>
-                                    <button className="logout">Logout</button>
-                                </div>
-                                
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
     
-    </>
-  )
-}
+    loadUserData();
+  }, [fetchCurrentUser]);
 
-export default UserProfile
+  useEffect(() => {
+    if (currentUser) {
+      setUserData({
+        name: currentUser.name || 'No name available',
+        avatar: currentUser.avatar?.url || defaultAvatar,
+        about: currentUser.about || 'No information available',
+        email: currentUser.email || 'No email available'
+      });
+    }
+  }, [currentUser]);
+
+  return (
+    <div className='userProfile'>
+      <div className="icon-container">
+        <div className="icon star-icon">
+          <Star size={20} /> {/* Lucide Star icon */}
+        </div>
+        <div className="icon settings-icon">
+          <Settings size={20} /> {/* Lucide Settings icon */}
+        </div>
+        <div className="profile-icon" onClick={toggleProfile}>
+          <img src={userData.avatar} alt="Profile Icon" />
+        </div>
+      </div>
+      
+      {showProfile && (
+        <div className="profile-overlay" onClick={toggleProfile}>
+          <div className="profile-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="profile-content">
+              <div className="profile-image">
+                <img src={userData.avatar} alt="Profile" />
+              </div>
+              <div className="profile-details">
+                <div className='name'>
+                  {userData.name}
+                  <PenLine size={16} className="icon-pen" /> {/* Lucide Pen icon */}
+                </div>
+                
+                <div className='about-section'>
+                  <div className="section-title">About</div>
+                  <div className="section-content">
+                    {userData.about}
+                    <PenLine size={16} className="icon-pen" /> {/* Lucide Pen icon */}
+                  </div>
+                </div>
+                
+                <div className='about-section'>
+                  <div className="section-title">Email Address</div>
+                  <div className="section-content">
+                    {userData.email}
+                  </div>
+                </div>
+                
+                <div className="divider"></div>
+                
+                <div className="handle-Logout">
+                  <button className="logout">
+                    <LogOut size={16} className="logout-icon" /> {/* Lucide LogOut icon */}
+                    Log out
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default UserProfile;

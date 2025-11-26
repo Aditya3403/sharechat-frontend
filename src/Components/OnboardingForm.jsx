@@ -89,7 +89,7 @@ const OnboardingForm = ({ setUser }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/user/signup', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/signup`, {
         method: 'POST',
         body: submitData,
       });
@@ -129,7 +129,6 @@ const OnboardingForm = ({ setUser }) => {
         </div>
         
         <form onSubmit={handleSubmit} className="rectangular-form">
-          {/* Left Column - Profile Picture */}
           <div className="form-left-column">
             <div className="avatar-section">
               <div className="avatar-container">
@@ -151,10 +150,8 @@ const OnboardingForm = ({ setUser }) => {
             
           </div>
 
-          {/* Right Column - Form Fields */}
           <div className="form-right-column">
 
-            {/* Verified Email Display */}
             <div className="verified-email-section">
               <p className="verified-email">
                 <FaUser className="verified-icon" />
@@ -162,7 +159,6 @@ const OnboardingForm = ({ setUser }) => {
               </p>
             </div>
             
-            {/* Personal Information */}
             <div className="form-grid">
               <div className="input-group-horizontal">
                 <FaUser className="input-icon" />

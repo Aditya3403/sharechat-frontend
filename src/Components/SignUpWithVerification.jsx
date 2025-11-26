@@ -5,14 +5,13 @@ import { FaEnvelope, FaLock, FaArrowLeft, FaSignInAlt } from 'react-icons/fa';
 import OnboardingForm from '../Components/OnboardingForm.jsx';
 
 const SignUpWithVerification = ({ setUser }) => {
-  const [step, setStep] = useState(1); // 1: Email entry, 2: OTP verification, 3: Onboarding
+  const [step, setStep] = useState(1); 
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Timer for OTP resend
   useEffect(() => {
     let interval;
     if (timer > 0) {
@@ -28,7 +27,7 @@ const SignUpWithVerification = ({ setUser }) => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:3000/user/send-otp', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/send-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,7 +37,7 @@ const SignUpWithVerification = ({ setUser }) => {
 
       if (response.ok) {
         setStep(2);
-        setTimer(60); // 60 seconds timer
+        setTimer(60);
       } else {
         const errorData = await response.json();
         alert(errorData.message || 'Failed to send OTP. Please try again.');
@@ -56,7 +55,7 @@ const SignUpWithVerification = ({ setUser }) => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:3000/user/verify-otp', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +81,7 @@ const SignUpWithVerification = ({ setUser }) => {
     if (timer > 0) return;
     
     try {
-      const response = await fetch('http://localhost:3000/user/send-otp', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/send-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

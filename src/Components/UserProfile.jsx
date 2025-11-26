@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
 import '../Styles/UserProfile.css';
 import defaultAvatar from '../Constants/avatar.jpg';
 import useUserStore from '../store/useUserStore.js';
-// Import Lucide icons
-import { Star, Settings, PenLine, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 const UserProfile = () => {
   const [showProfile, setShowProfile] = useState(false);
   const { currentUser, fetchCurrentUser } = useUserStore();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
   const [userData, setUserData] = useState({
     name: 'Loading...',
     avatar: defaultAvatar,
@@ -21,16 +23,13 @@ const UserProfile = () => {
   };
 
   useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        await fetchCurrentUser();
-      } catch (error) {
-        console.error('Error loading user data:', error);
-      }
-    };
-    
-    loadUserData();
-  }, [fetchCurrentUser]);
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    fetchCurrentUser();
+  }
+}, []);
+
 
   useEffect(() => {
     if (currentUser) {
@@ -43,15 +42,21 @@ const UserProfile = () => {
     }
   }, [currentUser]);
 
+  const handleLogOut = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    navigate('/login');
+  };
+
   return (
     <div className='userProfile'>
       <div className="icon-container">
-        <div className="icon star-icon">
-          <Star size={20} /> {/* Lucide Star icon */}
+        {/* <div className="icon star-icon">
+          <Star size={20} />
         </div>
         <div className="icon settings-icon">
-          <Settings size={20} /> {/* Lucide Settings icon */}
-        </div>
+          <Settings size={20} />
+        </div> */}
         <div className="profile-icon" onClick={toggleProfile}>
           <img src={userData.avatar} alt="Profile Icon" />
         </div>
@@ -67,16 +72,16 @@ const UserProfile = () => {
               <div className="profile-details">
                 <div className='name'>
                   {userData.name}
-                  <PenLine size={16} className="icon-pen" /> {/* Lucide Pen icon */}
+                  {/* <PenLine size={16} className="icon-pen" /> */}
                 </div>
                 
-                <div className='about-section'>
+                {/* <div className='about-section'>
                   <div className="section-title">About</div>
                   <div className="section-content">
                     {userData.about}
-                    <PenLine size={16} className="icon-pen" /> {/* Lucide Pen icon */}
+                    <PenLine size={16} className="icon-pen" />
                   </div>
-                </div>
+                </div> */}
                 
                 <div className='about-section'>
                   <div className="section-title">Email Address</div>
@@ -88,8 +93,8 @@ const UserProfile = () => {
                 <div className="divider"></div>
                 
                 <div className="handle-Logout">
-                  <button className="logout">
-                    <LogOut size={16} className="logout-icon" /> {/* Lucide LogOut icon */}
+                  <button className="logout" onClick={handleLogOut}>
+                    <LogOut size={16} className="logout-icon" />
                     Log out
                   </button>
                 </div>

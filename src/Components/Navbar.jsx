@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import '../Styles/Navbar.css';
-import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import useUserStore from '../store/useUserStore.js';
 
@@ -9,15 +8,13 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState('new');
   const { currentUser, fetchCurrentUser, updateUser } = useUserStore();
-  const navigate = useNavigate();
 
-  // Get notifications from currentUser object
+
   const allNotifications = currentUser?.notifications || [];
   const newNotifications = allNotifications.filter(n => !n.archived);
   const archivedNotifications = allNotifications.filter(n => n.archived);
   const unreadCount = newNotifications.filter(n => !n.read).length;
 
-  // Determine which notifications to display based on active tab
   const displayedNotifications = activeTab === 'new' ? newNotifications : archivedNotifications;
 
   useEffect(() => {
@@ -65,20 +62,12 @@ const Navbar = () => {
         return notification;
       });
       
-      // Update the user in the Zustand store
       await updateUser({ notifications: updatedNotifications });
       
-      // Force refresh the current user data
       await fetchCurrentUser();
     } catch (error) {
       console.error('Error archiving notification:', error);
     }
-  };
-
-  const handleLogOut = () => {
-    Cookies.remove('token');
-    setIsLoggedIn(false);
-    navigate('/login');
   };
 
   return (

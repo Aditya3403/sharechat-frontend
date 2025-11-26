@@ -2,7 +2,8 @@ import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
+// console.log("ENV:", process.env.REACT_APP_BACKEND_URL);
 
 const useUserStore = create((set, get) => ({
 
@@ -22,31 +23,29 @@ const useUserStore = create((set, get) => ({
     const chatId = typeof userId === 'object' ? userId._id : userId;
     set({ 
       selectedChat: chatId,
-      otherUser: userData || get().otherUser // Preserve existing otherUser if no data provided
+      otherUser: userData || get().otherUser
     });
   },
   
-handleSelectChat: (userId, userData, navigate) => {
-  const chatId = typeof userId === 'object' ? userId._id : userId;
+  handleSelectChat: (userId, userData, navigate) => {
+    const chatId = typeof userId === 'object' ? userId._id : userId;
 
-  set({
-    selectedChat: chatId,
-    otherUser: userData || get().otherUser
-  });
+    set({
+      selectedChat: chatId,
+      otherUser: userData || get().otherUser
+    });
 
-  // 🔥 Persist
-  if (userData) {
-    localStorage.setItem("selectedChatUser", JSON.stringify(userData));
-  }
+    if (userData) {
+      localStorage.setItem("selectedChatUser", JSON.stringify(userData));
+    }
 
-  if (navigate) navigate(`/chat/${chatId}`);
+    if (navigate) navigate(`/chat/${chatId}`);
 
-  const { currentUser } = get();
-  if (currentUser) {
-    get().fetchChatMessages(currentUser._id, chatId);
-  }
-},
-
+    const { currentUser } = get();
+    if (currentUser) {
+      get().fetchChatMessages(currentUser._id, chatId);
+    }
+  },
 
   fetchCurrentUser: async () => {
     set({ isFetchingUser: true, userError: null });
@@ -77,31 +76,31 @@ handleSelectChat: (userId, userData, navigate) => {
   },
   
   fetchOtherUser: async (userId) => {
-  if (!userId) return;
-  
-  set({ isFetchingUser: true });
-  try {
-    const token = localStorage.getItem('token');
-    const response = await axios.get(`${API_BASE_URL}/user/${userId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+    if (!userId) return;
     
-    set({ 
-      otherUser: response.data,
-      isFetchingUser: false 
-    });
-    
-    return response.data;
-  } catch (error) {
-    set({ 
-      userError: error.response?.data?.message || error.message,
-      isFetchingUser: false 
-    });
-    return null;
-  }
-},
+    set({ isFetchingUser: true });
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_BASE_URL}/user/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      set({ 
+        otherUser: response.data,
+        isFetchingUser: false 
+      });
+      
+      return response.data;
+    } catch (error) {
+      set({ 
+        userError: error.response?.data?.message || error.message,
+        isFetchingUser: false 
+      });
+      return null;
+    }
+  },
   
   fetchChatMessages: async (currentUserId, otherUserId) => {
     if (!currentUserId || !otherUserId) return [];
@@ -134,6 +133,7 @@ handleSelectChat: (userId, userData, navigate) => {
       return [];
     }
   },
+
   sendMessage: async (senderId, receiverId, message) => {
     try {
       const token = localStorage.getItem('token');
@@ -151,56 +151,30 @@ handleSelectChat: (userId, userData, navigate) => {
   addToChatWith: async (currentUserId, otherUserId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(`${API_BASE_URL}/user/add-to-chatwith`, {
+      await axios.post(`${API_BASE_URL}/user/add-to-chatwith`, {
         userId: currentUserId,
         otherUserId
       }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` }
       });
-      
-      const otherUserData = await get().fetchOtherUser(otherUserId);
-      
-      if (otherUserData) {
-        const selectedUserForHeader = {
-          _id: otherUserId,
-          name: otherUserData.name,
-          avatar: otherUserData.avatar,
-        };
 
-        // update store
-        set(state => ({
-          chatWithUsers: [
-            ...state.chatWithUsers, 
-            {
-              userId: otherUserId,
-              name: otherUserData.name,
-              avatar: otherUserData.avatar,
-            }
-          ],
-          otherUser: selectedUserForHeader
-        }));
-
-        // 🔥 persist for refresh
-        localStorage.setItem(
-          "selectedChatUser",
-          JSON.stringify(selectedUserForHeader)
-        );
-      }
-
-      
       await get().fetchCurrentUser();
-      
-      return response.data;
+
+      return true;
     } catch (error) {
-      set({ 
-        userError: error.response?.data?.message || error.message
-      });
+      set({ userError: error.response?.data?.message || error.message });
       throw error;
     }
   },
-  
+
+  addUserToChatList: async (userId) => {
+    const { chatWithUsers, fetchCurrentUser } = get();
+
+    if (chatWithUsers.some(u => u.userId === userId)) return;
+
+    await fetchCurrentUser();
+  },
+
   clearUser: () => set({ 
     currentUser: null,
     otherUser: null,

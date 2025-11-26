@@ -2,8 +2,8 @@
     display: flex;
     flex-direction: column;
     background-color: rgb(248, 248, 248);
-    height: 100vh; /* Full viewport height */
-    overflow: hidden; /* Prevent overall scrolling */
+    height: 100vh;
+    overflow: hidden;
     border-top: 1px solid rgb(227, 227, 227);
 }
 
@@ -22,7 +22,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    object-fit: cover; /* Ensures avatar image fits properly */
+    object-fit: cover;
     margin-right: 10px;
 }
 
@@ -36,39 +36,37 @@
 }
 
 .chat-messages {
-    flex: 1; /* Takes all available space */
-    overflow-y: auto; /* Enable scrolling only for messages */
+    flex: 1;
+    overflow-y: auto;
     padding-left: 10px;
     padding-right: 10px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    min-height: 0; /* Crucial for flex scrolling */
-
+    min-height: 0;
     &::-webkit-scrollbar {
         display: none;
     }
     
-    /* Hide scrollbar for IE, Edge and Firefox */
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-/* This is the container div that handles alignment */
 .message-container {
     display: flex;
     width: 100%;
 }
 
 .own-message {
-    justify-content: flex-end; /* Right align sent messages */
+    justify-content: flex-end;
+    margin-top: 10px;
 }
 
 .other-message {
-    justify-content: flex-start; /* Left align received messages */
+    justify-content: flex-start;
+    margin-top: 10px
 }
 
-/* This is the message bubble */
 .message-bubble {
     max-width: 70%;
     padding: 10px 15px;
@@ -77,12 +75,12 @@
 }
 
 .outgoing {
-    background-color: #dcf8c6; /* Green for sent messages */
+    background-color: #dcf8c6;
     border-bottom-right-radius: 5px;
 }
 
 .incoming {
-    background-color: #f1f0f0; /* Gray for received messages */
+    background-color: #f1f0f0;
     border-bottom-left-radius: 5px;
 }
 
@@ -125,8 +123,7 @@
 
 .message-box button {
     margin-left: 10px;
-    background-color: #007bff;
-    color: white;
+    color: rgb(0, 0, 0);
     border: none;
     border-radius: 50%;
     width: 40px;
@@ -139,7 +136,7 @@
 
 .no-messages, .loading-messages, .error-message {
     text-align: center;
-    color: #777;
+
     padding: 20px;
 }
 
@@ -172,8 +169,6 @@
     margin: 0 10px;
   }
 
-  /* --- Attachment UI --- */
-
 .attachment-wrapper {
   position: relative;
 }
@@ -181,7 +176,7 @@
 .clip-btn {
   background: transparent;
   border: none;
-  font-size: 22px;
+  font-size: 18px;
   cursor: pointer;
   padding: 8px;
   color: #555;
@@ -193,7 +188,7 @@
 
 .attachment-menu {
   position: absolute;
-  bottom: 50px; /* <--- dropdown OPEN UP */
+  bottom: 50px;
   left: 0;
   background: #fff;
   border-radius: 10px;
@@ -272,7 +267,7 @@
   left: 40%;
   width: 30%;
 
-  height: 40%; /* this makes it use half chat area */
+  height: 40%;
   background: #ffffff;
   border-radius: 0px 0px 0 0;
 
@@ -283,7 +278,6 @@
   z-index: 999;
 }
 
-/* Top bar */
 .image-preview-header {
   width: 100%;
   height: 36px;
@@ -293,7 +287,6 @@
   position: relative;
 }
 
-/* cancel button in right corner */
 .close-preview {
   position: absolute;
   right: 16px;
@@ -304,7 +297,6 @@
   cursor: pointer;
 }
 
-/* Image takes max space */
 .image-preview-body {
   flex: 1;
   display: flex;
@@ -320,7 +312,6 @@
   border-radius: 6px;
 }
 
-/* Caption area at bottom */
 .image-preview-caption {
   padding: 10px;
   border-top: 1px solid #e5e5e5;
@@ -335,12 +326,17 @@
   font-size: 15px;
 }
 
-/* slide up animation */
 @keyframes popUp {
   from { transform: translateY(50px); opacity: 0; }
   to   { transform: translateY(0); opacity: 1; }
 }
 
+.send-image{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+}
 
 
   

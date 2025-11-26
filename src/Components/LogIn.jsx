@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import '../Styles/LogIn.css';
-import { FaGoogle, FaEnvelope, FaLock, FaArrowLeft } from 'react-icons/fa';
+import { FaGoogle, FaArrowLeft } from 'react-icons/fa';
 
 const LogIn = ({ setUser }) => {
   const [isLogIn, setIsLogIn] = useState(true);
-  const [step, setStep] = useState(1); // 1: Email entry, 2: OTP verification
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
@@ -14,7 +14,6 @@ const LogIn = ({ setUser }) => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Timer for OTP resend
   React.useEffect(() => {
     let interval;
     if (timer > 0) {
@@ -30,7 +29,7 @@ const LogIn = ({ setUser }) => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:3000/user/send-otp', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/send-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +57,7 @@ const LogIn = ({ setUser }) => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:3000/user/verify-otp', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +66,6 @@ const LogIn = ({ setUser }) => {
       });
 
       if (response.ok) {
-        // Redirect to onboarding page with verified email
         navigate('/onboarding', { state: { verifiedEmail: email } });
       } else {
         const errorData = await response.json();
@@ -85,7 +83,7 @@ const LogIn = ({ setUser }) => {
     if (timer > 0) return;
     
     try {
-      const response = await fetch('http://localhost:3000/user/send-otp', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/send-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +107,7 @@ const LogIn = ({ setUser }) => {
   const handleLogIn = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch('http://localhost:3000/user/login', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,7 +145,6 @@ const LogIn = ({ setUser }) => {
     }
   };
 
-  // If user is signing up and email is not verified, show verification steps
   if (!isLogIn && step < 3) {
     return (
       <div className="auth-container">
@@ -222,7 +219,6 @@ const LogIn = ({ setUser }) => {
     );
   }
 
-  // Regular login form
   return (
     <div className="auth-container">
       <div className="auth-form">

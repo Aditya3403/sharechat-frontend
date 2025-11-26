@@ -37,7 +37,6 @@ const ChatList = ({ width = "100%" }) => {
   });
   const searchRef = useRef(null);
 
-  // Sync URL chatId with selectedChat in store
   useEffect(() => {
     if (chatId && chatId !== selectedChat) {
       setSelectedChat(chatId);
@@ -48,7 +47,6 @@ const ChatList = ({ width = "100%" }) => {
     console.log("Fetching current user on mount");
     fetchCurrentUser();
     
-    // Load pinned chats from localStorage if available
     const savedPinnedChats = localStorage.getItem('pinnedChats');
     if (savedPinnedChats) {
       try {
@@ -82,7 +80,7 @@ const ChatList = ({ width = "100%" }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:3000/user/all`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/all`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -172,15 +170,12 @@ const ChatList = ({ width = "100%" }) => {
     handleAddToChatWith(user);
   };
 
-  // In your ChatList component, update the useEffect for URL sync
   useEffect(() => {
-    // When chatId changes in URL, update selectedChat in store
     if (chatId && chatId !== selectedChat) {
       setSelectedChat(chatId);
     }
   }, [chatId]);
 
-  // Update the handleUserClick to be more explicit
   const handleUserClick = (user) => {
     console.log("User:",user)
     if (user.userId !== selectedChat) {
@@ -228,7 +223,7 @@ const ChatList = ({ width = "100%" }) => {
                   className="suggestion-item"
                   onClick={(e) => handleSuggestionClick(user, e)}
                 >
-                  <img src={user?.avatar?.url || avatar} alt={user.name} className="suggestion-avatar" />
+                  <img src={user.avatar?.url || avatar} alt={user.name} className="suggestion-avatar" />
                   <span>{user.name}</span>
                 </div>
               ))

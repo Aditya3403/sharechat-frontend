@@ -6,6 +6,7 @@ import { IoMdSend } from "react-icons/io";
 import useUserStore from '../store/useUserStore';
 import { useParams } from "react-router-dom";
 import { FiPaperclip } from "react-icons/fi";
+import { MdOutlinePhoto } from "react-icons/md";
 
 const Chat = () => {
   const { chatId } = useParams();
@@ -16,10 +17,11 @@ const Chat = () => {
     selectedChat,
     fetchOtherUser,
     fetchChatMessages,
-    setSelectedChat
+    setSelectedChat,
+    addUserToChatList
   } = useUserStore();
   console.log("Other user:",otherUser)
-  // Sync route param with selected chat
+
   useEffect(() => {
     if (chatId && chatId !== selectedChat) {
       setSelectedChat(chatId);
@@ -45,10 +47,8 @@ const Chat = () => {
   setIsAttachmentOpen(false);
 };
 
-
-
   const socket = useMemo(() => {
-    const s = io("http://localhost:3000", {
+    const s = io(process.env.REACT_APP_BACKEND_URL, {
       withCredentials: true,
       autoConnect: true,
       reconnectionAttempts: 5,
@@ -63,35 +63,38 @@ const Chat = () => {
       }
     });
 
-    s.on("receive-message", (data) => {
-      console.log("Received message:", data);
-      if (data.sender === chatId || data.sender === selectedChat) {
-        setMessages(prev => [
-          ...prev,
-          { 
-            text: data.message, 
-            sender: data.sender, 
-            timestamp: data.timestamp,
-            isOwnMessage: false 
-          }
-        ]);
-      }
+   s.on("receive-message", async (data) => {
+      if (data.chatId !== activeChatId) return;
+      
+      if (data.sender === currentUser._id) return;
+
+      await addUserToChatList(data.sender);
+
+      setMessages(prev => [
+        ...prev,
+        {
+          text: data.message,
+          sender: data.sender,
+          timestamp: new Date(data.timestamp),
+          isOwnMessage: false
+        }
+      ]);
     });
 
-    s.on("receive-image", (data) => {
-  console.log("Received image:", data);
-  const { msg, media } = data;
 
-  setMessages(prev => [
-    ...prev,
-    {
-      ...msg,
-      imageUrl: media.url,
-      isOwnMessage: false
-    }
-  ]);
-});
-
+   s.on("receive-image", ({ msg, media }) => {
+      if (msg.sender === currentUser._id) return;
+      setMessages(prev => [
+        ...prev,
+        {
+          sender: msg.sender,
+          text: "",
+          imageUrl: media.url,
+          timestamp: msg.time ? new Date(msg.time) : new Date(),
+          isOwnMessage: false
+        }
+      ]);
+    });
 
     s.on("disconnect", () => {
       console.log("Socket disconnected");
@@ -104,7 +107,7 @@ const Chat = () => {
     return s;
   }, [currentUser, chatId, selectedChat]);
 
-  // Group messages by date
+
   const groupMessagesByDate = (messages) => {
     const grouped = {};
     
@@ -144,7 +147,6 @@ const Chat = () => {
       setLoading(true);
       setMessages([]);
       
-      // Only fetch other user if we don't already have their data
       if (!otherUser || otherUser._id !== activeChatId) {
         await fetchOtherUser(activeChatId);
       }
@@ -157,8 +159,10 @@ const Chat = () => {
           text: msg.text,
           sender: msg.sender,
           timestamp: msg.timestamp || msg.time,
+          imageUrl: msg.mediaUrl || null,     // <-- ADD THIS
           isOwnMessage: msg.sender === currentUser._id
         })));
+
       } else {
         console.error("Expected array of messages but got:", messagesData);
       }
@@ -191,7 +195,6 @@ const Chat = () => {
   const activeChatId = chatId || selectedChat;
   if (!activeChatId || !currentUser) return;
 
-  // 1️⃣ If image selected → upload and send image
   if (selectedImage) {
 
     const token = localStorage.getItem('token');
@@ -213,17 +216,17 @@ const Chat = () => {
 
       const { message, media } = data;
 
-      // append to UI
       setMessages(prev => [
         ...prev,
         {
           ...message,
           imageUrl: media.url,
+          timestamp: new Date(),
           isOwnMessage: true
         }
       ]);
 
-      // notify other user
+
       socket.emit("send-image", {
         sender: currentUser._id,
         receiver: activeChatId,
@@ -231,7 +234,7 @@ const Chat = () => {
         imageUrl: media.url
       });
 
-      // clear state
+
       setSelectedImage(null);
       setImagePreviewUrl(null);
       setMessage("");
@@ -244,7 +247,6 @@ const Chat = () => {
     }
   }
 
-  // 2️⃣ Otherwise send normal text message
   if (message.trim()) {
     const timestamp = new Date().toISOString();
     const tempId = Date.now();
@@ -299,6 +301,11 @@ const Chat = () => {
   };
 
   const activeChatId = chatId || selectedChat;
+
+  const activeChatRef = useRef(activeChatId);
+  useEffect(()=>{
+    activeChatRef.current = activeChatId;
+  }, [activeChatId]);
   
   const getUserInitial = () => {
     if (otherUser?.name) {
@@ -351,15 +358,15 @@ const Chat = () => {
                       <div className={`message-bubble ${msg.isOwnMessage ? "outgoing" : "incoming"}`}>
                         <div className="message-content">
                           <div className="message-content">
-                            {msg.imageUrl ? (
+                            {msg.imageUrl || msg.mediaUrl ? (
                               <img
-                                src={`http://localhost:3000${msg.imageUrl}`}
+                                src={msg.imageUrl || msg.mediaUrl}
                                 className="chat-img"
-                                alt="chat-media"
                               />
                             ) : (
                               <p>{msg.text}</p>
                             )}
+
 
                             <span className="timestamp">
                               {formatTime(msg.timestamp || msg.time)}
@@ -422,7 +429,7 @@ const Chat = () => {
               {isAttachmentOpen && (
                 <div className="attachment-menu">
                   <label className="attachment-item">
-                    📷 Send Image
+                    <div className="send-image"><MdOutlinePhoto style={{fontSize:"22px"}}/> Share Photo</div>
                     <input
                       type="file"
                       accept="image/*"
@@ -446,7 +453,7 @@ const Chat = () => {
               disabled={loading || (!message.trim() && !selectedImage) || !activeChatId}
             >
 
-              <IoMdSend />
+              <IoMdSend style={{fontSize:"18px", backgroundColor:"none"}}/>
             </button>
           </form>
 

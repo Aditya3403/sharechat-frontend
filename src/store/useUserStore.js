@@ -119,11 +119,12 @@ const useUserStore = create((set, get) => ({
         ...msg,
         text: msg.text || msg.message,
         isOwnMessage: msg.sender.toString() === currentUserId,
-        timestamp: msg.time || msg.timestamp
+        timestamp: msg.time || msg.timestamp,
+        mediaUrl: msg.mediaUrl
       }));
       
       set({ isFetchingChat: false });
-      console.log(transformedMessages)
+      console.log("Transformed Message", transformedMessages)
       return transformedMessages;
     } catch (error) {
       set({ 

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import '../Styles/LogIn.css';
 import { FaGoogle, FaArrowLeft } from 'react-icons/fa';
+import { GoogleLogin } from "@react-oauth/google";
 
 const LogIn = ({ setUser }) => {
   const [isLogIn, setIsLogIn] = useState(true);
@@ -13,6 +14,13 @@ const LogIn = ({ setUser }) => {
   const [timer, setTimer] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const token = localStorage.getItem("token")
+
+  useEffect(() => {
+      if (token) {
+        navigate("/");
+      }
+  }, [token, navigate]);
 
   React.useEffect(() => {
     let interval;
@@ -130,6 +138,36 @@ const LogIn = ({ setUser }) => {
     }
   };
 
+  const handleGoogleSignup = async (credentialResponse) => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/google-signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        navigate("/onboarding", {
+          state: {
+            googleSignup: true,
+            email: data.data.email,
+            name: data.data.name,
+            avatar: data.data.avatar,
+          },
+        });
+      } else {
+        alert(data.message || "Google signup failed");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
+    }
+  };
+
   const toggleLogIn = () => {
     setIsLogIn(!isLogIn);
     setStep(1);
@@ -174,6 +212,16 @@ const LogIn = ({ setUser }) => {
               <button type="submit" className="auth-button" disabled={isLoading}>
                 {isLoading ? 'Sending...' : 'Send Verification Code'}
               </button>
+
+              <div className="divider">
+                <span>OR</span>
+              </div>
+
+              <GoogleLogin
+                onSuccess={handleGoogleSignup}
+                text="continue_with"
+                onError={() => console.log("Google Signup Failed")}
+              />
               
               <p className="toggle-auth" onClick={toggleLogIn}>
                 Already have an account? Log in
@@ -251,13 +299,35 @@ const LogIn = ({ setUser }) => {
         </form>
         
         <div className="divider">
-          <span>OR CONTINUE WITH</span>
+          <span>OR</span>
         </div>
         
-        <button className="google-button">
-          <FaGoogle className="google-icon" />
-          <span>Google</span>
-        </button>
+        <GoogleLogin
+          onSuccess={async (credentialResponse) => {
+            try {
+              const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/google-login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ credential: credentialResponse.credential }),
+              });
+
+              const data = await res.json();
+
+              if (res.ok) {
+                Cookies.set("token", data.token, { expires: 30 });
+                localStorage.setItem("token", data.token);
+                setUser(true);
+                navigate("/");
+              } else {
+                alert(data.message || "Google login failed");
+              }
+            } catch (err) {
+              console.error(err);
+              alert("Something went wrong");
+            }
+          }}
+          onError={() => console.log("Google Login Failed")}
+        />
         
         <p className="toggle-auth" onClick={toggleLogIn}>
           Don't have an account? Sign up

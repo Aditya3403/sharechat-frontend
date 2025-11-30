@@ -300,7 +300,10 @@ const Chat = () => {
                         }`}
                       >
                         {msg.mediaUrl ? (
-                          <img src={msg.mediaUrl} className="chat-img" />
+                          <>
+                            <img src={msg.mediaUrl} className="chat-img" alt="Shared content" />
+                            {msg.text && <p>{msg.text}</p>}
+                          </>
                         ) : (
                           <p>{msg.text}</p>
                         )}

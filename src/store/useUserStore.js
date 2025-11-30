@@ -124,7 +124,7 @@ const useUserStore = create((set, get) => ({
       }));
       
       set({ isFetchingChat: false });
-      console.log("Transformed Message", transformedMessages)
+      // console.log("Transformed Message", transformedMessages)
       return transformedMessages;
     } catch (error) {
       set({ 

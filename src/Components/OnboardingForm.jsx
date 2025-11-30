@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import '../Styles/OnboardingForm.css';
@@ -19,10 +19,10 @@ const OnboardingForm = ({ setUser }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const location = useLocation();
-  const verifiedEmail = location.state?.verifiedEmail || '';
+  const verifiedEmail = location.state?.verifiedEmail || location.state?.email || '';
 
   const discoverySources = [
     'Google Search',
@@ -115,6 +115,13 @@ const OnboardingForm = ({ setUser }) => {
   const handleBack = () => {
     navigate('/login');
   };
+
+  useEffect(() => {
+    if (token) {
+      navigate("/");
+    }
+  }, [token, navigate]);
+
 
   return (
     <div className="onboarding-container">

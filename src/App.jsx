@@ -21,7 +21,7 @@ function App() {
     if (!token) {
       setUser(false);
       setLoading(false);
-      navigate("/login");
+      // navigate("/login");
       return;
     }
 
@@ -38,7 +38,7 @@ function App() {
       <Route path="/" element={user ? <ProtectRoute user={user}><Home /></ProtectRoute> : <LandingPage />} />
       <Route path="/chat/:chatId" element={<ProtectRoute user={user}><Chat /></ProtectRoute>} />
       <Route path="/login" element={<LogIn setUser={setUser} />} />
-      <Route path="/onboarding" element={<ProtectRoute user={user}><OnboardingForm /></ProtectRoute>} />
+      <Route path="/onboarding" element={<ProtectRoute user={user}><OnboardingForm setUser={setUser}/></ProtectRoute>} />
       <Route path="/*" element={<PageNotFound />} />
     </Routes>
   );

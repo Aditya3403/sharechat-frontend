@@ -38,12 +38,12 @@
 .chat-messages {
     flex: 1;
     overflow-y: auto;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 4px;
     min-height: 0;
+    
     &::-webkit-scrollbar {
         display: none;
     }
@@ -55,74 +55,104 @@
 .message-container {
     display: flex;
     width: 100%;
+    margin: 2px 0;
 }
 
 .own-message {
     justify-content: flex-end;
-    margin-top: 10px;
 }
 
 .other-message {
     justify-content: flex-start;
-    margin-top: 10px
 }
 
 .message-bubble {
     max-width: 70%;
-    padding: 10px 15px;
+    padding: 8px 12px;
     border-radius: 18px;
     position: relative;
+    word-wrap: break-word;
 }
 
 .outgoing {
     background-color: #dcf8c6;
-    border-bottom-right-radius: 5px;
+    border-bottom-right-radius: 4px;
+    border: 1px solid #dcf8c6;
+    margin-top: 10px;
 }
 
 .incoming {
-    background-color: #f1f0f0;
-    border-bottom-left-radius: 5px;
+    background-color: #ffffff;
+    border-bottom-left-radius: 4px;
+    border: 1px solid #e0e0e0;
+    margin-top: 5px;
 }
 
-.message-content {
-    word-wrap: break-word;
-}
-
-.message-content p {
+.message-bubble p {
     margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #333;
 }
 
 .timestamp {
-    font-size: 0.7rem;
-    color: #777;
+    font-size: 0.65rem;
+    color: #999;
     display: block;
     text-align: right;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
-.read-indicator {
-    margin-left: 5px;
-    color: #4fc3f7;
+.incoming .timestamp {
+    text-align: left;
+}
+
+/* Date divider styling */
+.message-date-group {
+    margin-bottom: 16px;
+}
+
+.date-divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    color: #777;
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+.date-divider::before,
+.date-divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #e0e0e0;
+    margin: 0 10px;
 }
 
 .message-box {
     display: flex;
-    padding: 15px;
+    align-items: center;
+    padding: 12px 15px;
     background-color: white;
-    border-left: 1px solid rgb(227, 227, 227);
-    flex-shrink: 0; /* Keep input fixed at bottom */
+    border-top: 1px solid rgb(227, 227, 227);
+    flex-shrink: 0;
+    gap: 8px;
 }
 
 .message-box input {
     flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 20px;
+    padding: 10px 16px;
     outline: none;
+    font-size: 14px;
+    border: none;
+}
+
+.message-box input:focus {
+    border-color: #007bff;
+    background-color: white;
 }
 
 .message-box button {
-    margin-left: 10px;
     color: rgb(0, 0, 0);
     border: none;
     border-radius: 50%;
@@ -132,12 +162,20 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-.no-messages, .loading-messages, .error-message {
-    text-align: center;
+.message-box button:disabled {
+    color: rgb(161, 161, 161);
+    cursor: not-allowed;
+}
 
+/* Loading state */
+.loading-messages {
+    text-align: center;
     padding: 20px;
+    color: #777;
+    font-size: 14px;
 }
 
 .no-chat-selected {
@@ -146,7 +184,7 @@
     justify-content: center;
     height: 100%;
     color: #777;
-    font-size: 1.2em;
+    font-size: 1.1em;
 }
 .message-date-group {
     margin-bottom: 20px;
@@ -263,7 +301,7 @@
 
 .image-preview-popup {
   position: absolute;
-  bottom: 4%;
+  bottom: 3%;
   left: 40%;
   width: 30%;
 
@@ -290,7 +328,7 @@
 .close-preview {
   position: absolute;
   right: 16px;
-  top: 6px;
+  top: 8px;
   border: none;
   background: transparent;
   font-size: 18px;

@@ -3,6 +3,7 @@ import '../Styles/ChatList.css';
 import avatar from '../Constants/avatar.jpg';
 import useUserStore from '../store/useUserStore.js';
 import { useNavigate, useParams } from 'react-router-dom';
+import { MdOutlineClose } from "react-icons/md";
 
 const ChatList = ({ width = "100%" }) => {
   const navigate = useNavigate();
@@ -18,9 +19,9 @@ const ChatList = ({ width = "100%" }) => {
     setSelectedChat
   } = useUserStore();
   
-  console.log("Current User", currentUser);
-  console.log("Selected Chat", selectedChat);
-  console.log("Chat ID from URL", chatId);
+  // console.log("Current User", currentUser);
+  // console.log("Selected Chat", selectedChat);
+  // console.log("Chat ID from URL", chatId);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState([]);
@@ -37,6 +38,10 @@ const ChatList = ({ width = "100%" }) => {
   });
   const searchRef = useRef(null);
 
+  // console.log("contextMenu userId:", contextMenu);
+  // console.log("User entry:", users);
+  // console.log("chatWithUsers:", JSON.stringify(chatWithUsers, null, 2));
+
   useEffect(() => {
     if (chatId && chatId !== selectedChat) {
       setSelectedChat(chatId);
@@ -44,7 +49,7 @@ const ChatList = ({ width = "100%" }) => {
   }, [chatId, selectedChat, setSelectedChat]);
 
   useEffect(() => {
-    console.log("Fetching current user on mount");
+    // console.log("Fetching current user on mount");
     fetchCurrentUser();
     
     const savedPinnedChats = localStorage.getItem('pinnedChats');
@@ -57,9 +62,9 @@ const ChatList = ({ width = "100%" }) => {
     }
   }, []);
 
-  useEffect(() => {
-    console.log("Current chatWithUsers:", chatWithUsers);
-  }, [chatWithUsers]);
+  // useEffect(() => {
+  //   console.log("Current chatWithUsers:", chatWithUsers);
+  // }, [chatWithUsers]);
 
   useEffect(() => {
     const refreshTimer = setTimeout(() => {
@@ -71,9 +76,9 @@ const ChatList = ({ width = "100%" }) => {
     return () => clearTimeout(refreshTimer);
   }, [loading]);
 
-  useEffect(() => {
-    localStorage.setItem('pinnedChats', JSON.stringify(pinnedChats));
-  }, [pinnedChats]);
+  // useEffect(() => {
+  //   localStorage.setItem('pinnedChats', JSON.stringify(pinnedChats));
+  // }, [pinnedChats]);
 
   const fetchAllUsers = async () => {
     try {
@@ -86,7 +91,7 @@ const ChatList = ({ width = "100%" }) => {
           'Content-Type': 'application/json'
         },
       });
-      console.log("response",response)
+      // console.log("response",response)
       if (!response.ok) {
         throw new Error(`Failed to fetch users (Status: ${response.status})`);
       }
@@ -105,7 +110,7 @@ const ChatList = ({ width = "100%" }) => {
     try {
       if (!currentUser) return;
       
-      console.log("Adding user to chat:", user);
+      // console.log("Adding user to chat:", user);
       await addToChatWith(currentUser._id, user._id, navigate);
       setSearchTerm('');
       setShowSuggestions(false);
@@ -176,15 +181,18 @@ const ChatList = ({ width = "100%" }) => {
     }
   }, [chatId]);
 
-  const handleUserClick = (user) => {
-    console.log("User:",user)
-    if (user.userId !== selectedChat) {
-      handleSelectChat(user.userId, {
-        _id: user.userId,
+  const handleUserClick = (chatUser) => {
+    const user = chatUser.userId;
+
+    handleSelectChat(
+      user._id,
+      {
+        _id: user._id,
         name: user.name,
-        avatar: user.userId.avatar.url
-      }, navigate);
-    }
+        avatar: user.avatar?.url || avatar
+      },
+      navigate
+    );
   };
 
   const sortedUsers = Array.isArray(chatWithUsers) ? [
@@ -194,6 +202,11 @@ const ChatList = ({ width = "100%" }) => {
     ...chatWithUsers
       .filter(user => user && user.userId && !pinnedChats.includes(user.userId))
   ] : [];
+
+  const handleCloseChat = () => {
+    setSelectedChat(null);
+    navigate("/");
+  };
 
   return (
     <div className="chat-list" style={{ width }} onClick={closeContextMenu}>
@@ -244,7 +257,7 @@ const ChatList = ({ width = "100%" }) => {
             <div 
               className={`user ${user.userId === selectedChat ? 'selected' : ''}`}
               key={`${user.userId}-${user.name}`}
-              onContextMenu={(e) => handleRightClick(e, user.userId)}
+              onContextMenu={(e) => handleRightClick(e, user.userId._id)}
               onClick={() => handleUserClick(user)}
             >
               <div className="user-btn">
@@ -272,9 +285,18 @@ const ChatList = ({ width = "100%" }) => {
           onClick={(e) => e.stopPropagation()}
         >
           <button onClick={() => handlePinChat(contextMenu.userId)}>
-            <i className="fa-solid fa-thumbtack"></i> 
-            {pinnedChats.includes(contextMenu.userId) ? 'Unpin' : 'Pin to top'}
+            <div style={{width:"100%", display:"flex", justifyContent:"center", alignItems:"center"}}>
+              <i className="fa-solid fa-thumbtack"></i> 
+              {pinnedChats.includes(contextMenu.userId) ? 'Unpin' : 'Pin to top'}
+            </div>
           </button>
+          {contextMenu.userId === selectedChat && (
+            <button onClick={handleCloseChat}>
+              <div style={{width:"100%", display:"flex", justifyContent:"center", alignItems:"center"}}>
+                <MdOutlineClose style={{fontSize:"18px"}}/><span>Close Chat</span>
+              </div>
+            </button>
+          )}
         </div>
       )}
     </div>

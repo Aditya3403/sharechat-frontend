@@ -17,6 +17,12 @@ const LogIn = ({ setUser }) => {
   const token = localStorage.getItem("token")
 
   useEffect(() => {
+    if (window.google) {
+      window.google.accounts.id.disableAutoSelect();
+    }
+  }, []);
+
+  useEffect(() => {
       if (token) {
         navigate("/");
       }

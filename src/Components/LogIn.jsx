@@ -221,6 +221,7 @@ const LogIn = ({ setUser }) => {
                 onSuccess={handleGoogleSignup}
                 text="continue_with"
                 onError={() => console.log("Google Signup Failed")}
+                useOneTap={false}
               />
               
               <p className="toggle-auth" onClick={toggleLogIn}>

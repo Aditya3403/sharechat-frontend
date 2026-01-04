@@ -198,6 +198,11 @@ const Chat = () => {
           body: fd,
         });
 
+        if (!res.ok) {
+          console.error("Image upload failed");
+          return;
+        }
+
         const data = await res.json();
         const mediaUrl = data.mediaUrl;
 
@@ -211,6 +216,11 @@ const Chat = () => {
             isOwnMessage: true,
           },
         ]);
+
+        if (!data.mediaUrl) {
+          console.error("mediaUrl missing from backend");
+          return;
+        }
 
         socket.current.emit("send-image", {
           sender: currentUser._id,
